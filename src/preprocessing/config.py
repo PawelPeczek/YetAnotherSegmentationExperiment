@@ -1,0 +1,6 @@
+SHAPES_KEY = "shapes"
+LABEL_KEY = "label"
+POINTS_KEY = "points"
+HEIGHT_KEY = "imageHeight"
+WIDTH_KEY = "imageWidth"
+IMAGE_PATH_KEY = "imagePath"
