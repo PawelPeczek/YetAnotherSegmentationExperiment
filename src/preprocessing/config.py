@@ -8,4 +8,4 @@ WIDTH_KEY = "imageWidth"
 IMAGE_PATH_KEY = "imagePath"
 RESOURCES_PATH = pathlib.Path(__file__).parent.parent.parent / 'resources' / 'images'
 OUTPUT_DIR = 'output'
-ANGLES = ['60', '90']
+ANGLES = ['0', '30', '60', '90']
