@@ -1,3 +1,5 @@
 numpy
 tqdm
 opencv-python
+googledrivedownloader
+requests
