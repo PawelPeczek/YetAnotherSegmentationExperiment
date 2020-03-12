@@ -1,22 +1,15 @@
 import os
-from dataclasses import dataclass
 from functools import reduce
-from typing import Dict, Optional, Tuple
+from typing import Optional, Tuple
 
 from src.preprocessing.config import SHAPES_KEY, LABEL_KEY, HEIGHT_KEY, \
     WIDTH_KEY, POINTS_KEY, IMAGE_PATH_KEY
 from src.primitives.files import ParsedJSON
 from src.primitives.images import Shape, ImageSize, Point
+from src.primitives.preprocessing import Annotation
 from src.utils.fs_utils import safe_parse_json, \
     extract_file_name_without_extension
 from src.utils.iterables import append_to_dictionary_of_lists
-
-
-@dataclass(frozen=True)
-class Annotation:
-    name: str
-    shapes: Dict[str, Shape]
-    image_size: ImageSize
 
 
 class AnnotationParser:
