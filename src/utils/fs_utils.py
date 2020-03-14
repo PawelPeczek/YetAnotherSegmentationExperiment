@@ -20,3 +20,12 @@ def parse_json(path: str) -> ParsedJSON:
 def extract_file_name_without_extension(path: str) -> str:
     file_name = os.path.basename(path)
     return file_name.split(sep=".")[0]
+
+
+def make_path_relative(path: str, reference_path: str) -> Optional[str]:
+    if not path.startswith(reference_path):
+        return None
+    relative_path = path[len(reference_path):]
+    if not relative_path.startswith('/'):
+        return None
+    return relative_path[1:]

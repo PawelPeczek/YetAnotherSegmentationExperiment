@@ -3,3 +3,4 @@ tqdm
 opencv-python
 googledrivedownloader
 requests
+tensorflow==1.13.1

@@ -12,6 +12,7 @@ from src.preprocessing.annotations_parsing import AnnotationParser
 from src.primitives.preprocessing import FileName2FilePath, \
     DataSetExamplePaths, DataSetExample
 from src.utils.fs_utils import extract_file_name_without_extension
+from src.utils.images import load_image
 
 logging.getLogger().setLevel(LOGGING_LEVEL)
 
@@ -90,7 +91,7 @@ def convert_example_paths_into_example(example_paths: DataSetExamplePaths
     annotation = AnnotationParser.parse_annotation(
         annotation_path=example_paths.annotation_path
     )
-    image = cv.imread(example_paths.image_path, cv.IMREAD_UNCHANGED)
+    image = load_image(image_path=example_paths.image_path)
     if image is None or annotation is None:
         return None
     dataset_example = DataSetExample(
