@@ -12,10 +12,10 @@ ANNOTATIONS_DIR_NAME = 'annotations'
 BACKGROUNDS_DIR_NAME = 'backgrounds'
 GOOGLE_DRIVE_RESOURCE_ID = '17LG2ed6pfZQPlq5SkiOFl7djuhmls2No'
 CLASS_MAPPINGS = {
-    "adapter": 0,
-    "bottle": 1,
-    "box": 2,
-    "clamp": 3,
-    "drill": 4,
-    "duck": 5
+    "adapter": 1,
+    "bottle": 2,
+    "box": 3,
+    "clamp": 4,
+    "drill": 5,
+    "duck": 6
 }

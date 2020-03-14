@@ -6,7 +6,7 @@ import cv2 as cv
 
 from src.primitives.data_access import DataSetExample, \
     DataSetExampleDescription, DataSetExampleBatch
-from src.primitives.images import ImageSize
+from src.primitives.images import ImageSize, DimensionsOrder
 from src.utils.images import load_image, blend_image_with_background
 from src.utils.iterables import random_sample, parallel_map, split_list
 
@@ -43,7 +43,10 @@ class EntryTransformation(DataTransformation):
     def transform_example(self,
                           example_description: DataSetExampleDescription
                           ) -> DataSetExample:
-        image_rgba = load_image(image_path=example_description.image_path)
+        image_rgba = load_image(
+            image_path=example_description.image_path,
+            color_conversion_flag=cv.COLOR_BGRA2RGBA
+        )
         image, mask = image_rgba[:, :, :3], image_rgba[:, :, -1:]
         mask = mask.astype(np.bool)
         image = self.__blend_image_with_background(
@@ -82,10 +85,12 @@ class EntryTransformation(DataTransformation):
                                        image: np.ndarray,
                                        mask: np.ndarray
                                        ) -> DataSetExample:
-        target_size = self.__target_size.to_compact_form()
+        target_size = self.__target_size.to_compact_form(
+            dimensions_order=DimensionsOrder.WIDTH_HEIGHT
+        )
         if image.shape[:2] != target_size:
             image = cv.resize(image, target_size)
-            mask = cv.resize(image, target_size, interpolation=cv.INTER_NEAREST)
+            mask = cv.resize(mask, target_size, interpolation=cv.INTER_NEAREST)
         return image, mask
 
 

@@ -84,7 +84,7 @@ def blend_image_with_background(image: np.ndarray,
         image=image,
         background_random_adjust=background_random_adjust
     )
-    return image * mask + (1 - mask) * background
+    return (image * mask + (1 - mask) * background).astype(np.uint8)
 
 
 def adjust_background_to_image(background: np.ndarray,

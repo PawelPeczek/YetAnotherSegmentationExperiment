@@ -30,7 +30,7 @@ def for_each(iterable: Iterable[T], side_effect: Callable[[T], None]) -> None:
 def split_dictionary_by_value(dictionary: Dict[K, Tuple[V, V]],
                               ) -> Tuple[Dict[K, V], Dict[K, V]]:
     left_dict, right_dict = {}, {}
-    for key, value in dictionary:
+    for key, value in dictionary.items():
         left_dict[key], right_dict[key] = value
     left_dict = remove_empty_values_from_dictionary(dictionary=left_dict)
     right_dict = remove_empty_values_from_dictionary(dictionary=right_dict)
@@ -113,6 +113,7 @@ def parallel_map(iterable: List[V],
                  ) -> List[T]:
     pool = multiprocessing.Pool(processes=workers_number)
     result = pool.map(map_function, iterable)
+    pool.close()
     pool.join()
     return result
 

@@ -3,7 +3,6 @@ import os
 from glob import glob
 from typing import List, Dict, Optional
 
-import cv2 as cv
 from tqdm import tqdm
 
 from src.config import ANNOTATIONS_DIR_NAME, LOGGING_LEVEL, MASK_EXTENSION, \

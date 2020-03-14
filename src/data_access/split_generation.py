@@ -80,7 +80,7 @@ class RandomSplitGenerator(SplitGenerator):
         )
         split_list = partial(
             split_list_by_given_factor,
-            factor=-self.__random_split_specs.training_samples_factor
+            factor=self.__random_split_specs.training_samples_factor
         )
         dataset_split = {
             class_name: split_list(class_examples)
