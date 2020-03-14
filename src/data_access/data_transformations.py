@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import List, Dict, Optional
 
 import numpy as np
@@ -32,7 +32,7 @@ class EntryTransformation(DataTransformation):
                         ) -> DataSetExampleBatch:
         batch = parallel_map(
             iterable=example_descriptions,
-            map_function=self.transform,
+            map_function=self.transform_example,
             workers_number=self.__workers
         )
         images, ground_truths = split_list(to_split=batch)
@@ -40,9 +40,9 @@ class EntryTransformation(DataTransformation):
         ground_truths_batch = np.stack(ground_truths, axis=0)
         return images_batch, ground_truths_batch
 
-    def transform(self,
-                  example_description: DataSetExampleDescription
-                  ) -> DataSetExample:
+    def transform_example(self,
+                          example_description: DataSetExampleDescription
+                          ) -> DataSetExample:
         image_rgba = load_image(image_path=example_description.image_path)
         image, mask = image_rgba[:, :, :3], image_rgba[:, :, -1:]
         mask = mask.astype(np.bool)
@@ -87,3 +87,43 @@ class EntryTransformation(DataTransformation):
             image = cv.resize(image, target_size)
             mask = cv.resize(image, target_size, interpolation=cv.INTER_NEAREST)
         return image, mask
+
+
+class DataAugmentation(DataTransformation):
+
+    @abstractmethod
+    def transform_batch(self,
+                        batch: DataSetExampleBatch
+                        ) -> DataSetExampleBatch:
+        pass
+
+    @abstractmethod
+    def transform_example(self,
+                          dataset_example: DataSetExample
+                          ) -> DataSetExample:
+        pass
+
+
+class DataTransformationChain(DataTransformation):
+
+    def __init__(self,
+                 entry_transformation: EntryTransformation,
+                 augmentations: List[DataAugmentation]):
+        self.__chain = [entry_transformation]
+        self.__chain.extend(augmentations)
+
+    def transform_batch(self,
+                        example_descriptions: List[DataSetExampleDescription],
+                        ) -> DataSetExampleBatch:
+        results = example_descriptions
+        for transformation in self.__chain:
+            results = transformation.transform_batch(results)
+        return results
+
+    def transform_example(self,
+                          example_description: DataSetExampleDescription
+                          ) -> DataSetExample:
+        results = example_description
+        for transformation in self.__chain:
+            results = transformation.transform_example(results)
+        return results
