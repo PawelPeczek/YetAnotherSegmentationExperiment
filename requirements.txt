@@ -4,3 +4,4 @@ opencv-python
 googledrivedownloader
 requests
 tensorflow==1.13.1
+albumentations==0.4.5
