@@ -1,70 +1,33 @@
 import random
-from abc import ABC, abstractmethod
+from typing import List, Tuple
 
-from typing import List, Generator
+import numpy as np
+from tensorflow.python.keras.utils import Sequence
 
-from keras.engine.training_utils import make_batches
-from keras.utils import Sequence
-
-from config import DATASET_PATH
-from data_access.config import FOLDS_GENERATOR_SPECS, TRANSFORMATION_CHAIN, BATCH_SIZE
-from data_access.folds_generation import FoldsGenerator
-from primitives.data_access import DataSetExampleDescription, DataSetSplit
+from src.data_access.data_transformations import DataTransformationChain
+from src.primitives.data_access import DataSetExampleDescription
 
 
-class DataGenerator(ABC, Sequence):
-    def __init__(self) -> None:
+class DataGenerator(Sequence):
+    def __init__(self,
+                 examples: List[DataSetExampleDescription],
+                 transformation_chain: DataTransformationChain,
+                 batch_size: int = 32):
         super().__init__()
-        self.splits = self.__create_splits()
-        self.batch_count = self.__calculate_batch_count()
-        self.on_epoch_end()
-        self.indexes = self.prepare_batch_indexes()
+        self.__examples = examples
+        self.__transformation_chain = transformation_chain
+        self.__batch_size = batch_size
 
-    def __create_splits(self) -> Generator[DataSetSplit, None, None]:
-        return FoldsGenerator(
-            dataset_path=DATASET_PATH,
-            generator_specs=FOLDS_GENERATOR_SPECS
-        ).generate_folds()
+    def on_epoch_end(self) -> None:
+        random.shuffle(self.__examples)
 
-    def on_epoch_end(self):
-        split = next(self.splits)
-        all_batch = self.get_data(split)
-        random.shuffle(all_batch)
-        self.data = TRANSFORMATION_CHAIN.transform_batch(all_batch)
+    def __len__(self) -> int:
+        return int(np.floor(len(self.__examples) / self.__batch_size))
 
-    def __calculate_batch_count(self):
-        gen = self.__create_splits()
-        dataset_size = len(next(gen).training_set.examples)
-        return len(make_batches(dataset_size, BATCH_SIZE))
-
-    @abstractmethod
-    def get_data(self, split: DataSetSplit) -> List[DataSetExampleDescription]:
-        pass
-
-    def __len__(self):
-        return self.batch_count-1
-
-    def __getitem__(self, index):
-        return self.__get_slice_from_batch(self.indexes[index])
-
-    def prepare_batch_indexes(self):
-        return make_batches(len(self.data[0]), BATCH_SIZE)
-
-    def __get_slice_from_batch(self, batch_idx):
-        start = batch_idx[0]
-        end = batch_idx[1]
-        X = self.data[0][start:end, :, :, :]
-        y = self.data[1][start:end, :, :]
-        return X, y
-
-
-class TrainGenerator(DataGenerator):
-    def get_data(self, split: DataSetSplit) -> List[DataSetExampleDescription]:
-        return split.training_set.examples
-
-
-class TestGenerator(DataGenerator):
-    def get_data(self, split: DataSetSplit) -> List[DataSetExampleDescription]:
-        return split.test_set.examples
-
-
+    def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray]:
+        start_index, end_index = \
+            index * self.__batch_size, (index + 1) * self.__batch_size
+        batch_examples = self.__examples[start_index:end_index]
+        return self.__transformation_chain.transform_batch(
+            example_descriptions=batch_examples
+        )

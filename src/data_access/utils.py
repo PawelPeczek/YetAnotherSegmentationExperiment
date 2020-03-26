@@ -4,14 +4,15 @@ from functools import partial, reduce
 from glob import glob
 from typing import Set, Dict, List, Optional, TypeVar, Tuple
 
-from src.config import MASK_EXTENSION, MASK_NAME_POSTFIX, BACKGROUNDS_DIR_NAME
+from src.config import MASK_EXTENSION, MASK_NAME_POSTFIX, \
+    BACKGROUNDS_DIR_NAME, BACKGROUND_CLASS
 from src.primitives.data_access import DataSetExampleDescription, \
     ExampleDescriptionsByClass, ExamplesPathsByClass, \
     ExamplesPathsByClassAndAngle
 from src.utils.fs_utils import make_path_relative
 from src.utils.iterables import append_to_dictionary_of_lists, \
     count_dictionary_values, sum_dictionary_values, add_grouping_to_dictionary, \
-    random_sample
+    random_sample, trim_dictionary_values, standardise_dictionary_values
 from src.utils.numbers import safe_cast_str2int
 
 V = TypeVar('V')
@@ -149,3 +150,37 @@ def sample_background_path(data_set_dir: str) -> str:
     if len(backgrounds) == 0:
         raise RuntimeError("Cannot find backgrounds.")
     return random_sample(to_sample=backgrounds)
+
+
+def prepare_class_weighting(class_balance: Dict[str, float],
+                            class_mapping: Dict[str, int],
+                            stability_coefficient: float = 1e-7
+                            ) -> Dict[int, float]:
+    classes_names_intersection = set(class_balance.keys()).intersection(
+        set(class_mapping.keys())
+    )
+    classes_names_union = set(class_balance.keys()).union(
+        set(class_mapping.keys())
+    )
+    if classes_names_intersection != classes_names_union:
+        raise ValueError(
+            "Class balance dict is not compliant with class mapping."
+        )
+    class_weighting = {}
+    for key in class_balance:
+        class_id = class_mapping[key]
+        class_weighting[class_id] = \
+            1.0 / (class_balance[key] + stability_coefficient)
+    return _standardise_class_weighting(class_weighting=class_weighting)
+
+
+def _standardise_class_weighting(class_weighting: Dict[int, float]
+                                 ) -> Dict[int, float]:
+    class_weighting[BACKGROUND_CLASS] = \
+        min(class_weighting.values()) / len(class_weighting)
+    maximum_coefficient = (6 * len(class_weighting))
+    class_weighting = trim_dictionary_values(
+        dictionary=class_weighting,
+        max_value=maximum_coefficient
+    )
+    return standardise_dictionary_values(dictionary=class_weighting)

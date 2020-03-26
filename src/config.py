@@ -12,6 +12,7 @@ ANNOTATIONS_DIR_NAME = 'annotations'
 BACKGROUNDS_DIR_NAME = 'backgrounds'
 BACKGROUNDS_WILDRCARD = os.path.join(DATASET_PATH, BACKGROUNDS_DIR_NAME, "*.jpg")
 GOOGLE_DRIVE_RESOURCE_ID = '17LG2ed6pfZQPlq5SkiOFl7djuhmls2No'
+BACKGROUND_CLASS = 0
 CLASS_MAPPINGS = {
     "adapter": 1,
     "bottle": 2,

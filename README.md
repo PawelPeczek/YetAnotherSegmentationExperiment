@@ -1,5 +1,27 @@
 # YetAnotherSegmentationExperiment
 
+## Repository set-up
+
+To set up the project:
+* Create a conda environment (or venv if you like)
+    ```bash
+    conda create -n YetAnotherSegmentationExperiment python=3.7
+    ```
+* Source the env
+    ```bash
+    conda activate YetAnotherSegmentationExperiment
+    ```
+* Install requirements
+    ```bash
+    (YetAnotherSegmentationExperiment) project_root$ pip install -r requirements.txt
+    ```
+    
+
+__In case of issues with packages visibility in jupyter__
+```bash
+(YetAnotherSegmentationExperiment) python -m ipykernel install --name "YetAnotherSegmentationExperiment" --user
+```
+
 ## Data pre-processing
 
 To fetch data:

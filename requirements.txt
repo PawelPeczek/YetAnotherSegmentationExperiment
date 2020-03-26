@@ -1,4 +1,4 @@
-keras
+ipykernel
 numpy
 tqdm
 opencv-python

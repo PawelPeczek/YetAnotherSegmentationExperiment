@@ -2,7 +2,7 @@ import multiprocessing
 import operator
 from functools import reduce
 from typing import Dict, TypeVar, List, Tuple, Iterable, Callable, Optional, \
-    Any, Set
+    Any, Set, Union
 
 import numpy as np
 
@@ -130,3 +130,22 @@ def split_list(to_split: List[Tuple[K, T]]) -> Tuple[List[K], List[T]]:
         return left_list, right_list
 
     return reduce(reducer, to_split, ([], []))
+
+
+def trim_dictionary_values(dictionary: Dict[K, Union[int, float]],
+                           max_value: Union[float, float]
+                           ) -> Dict[K, Union[int, float]]:
+    for key in dictionary:
+        value = dictionary[key]
+        if value > max_value:
+            value = max_value
+        dictionary[key] = value
+    return dictionary
+
+
+def standardise_dictionary_values(dictionary: Dict[K, Union[int, float]]
+                                  ) -> Dict[K, Union[int, float]]:
+    values_sum = sum(dictionary.values())
+    for key in dictionary:
+        dictionary[key] /= values_sum
+    return dictionary

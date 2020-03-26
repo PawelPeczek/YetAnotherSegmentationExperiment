@@ -3,19 +3,19 @@ import cv2 as cv
 from albumentations import (
     HorizontalFlip, VerticalFlip, Blur, RandomGamma, Rotate, ShiftScaleRotate,
     OpticalDistortion, GridDistortion, ElasticTransform, HueSaturationValue,
-    RGBShift, RandomBrightness, RandomContrast, MotionBlur, GaussianBlur,
-    CLAHE, ChannelShuffle, ToGray, JpegCompression, Cutout, Downscale,
-    FancyPCA, Posterize, Equalize, ISONoise, RandomFog
+    RGBShift, MotionBlur, GaussianBlur, CLAHE, ChannelShuffle, ToGray,
+    Downscale, FancyPCA, Posterize, Equalize, ISONoise, RandomFog,
+    RandomBrightnessContrast, ImageCompression, CoarseDropout
 )
 
-from config import CLASS_MAPPINGS, BACKGROUNDS_WILDRCARD
-from data_access.data_transformations import EntryTransformation, DataAugmentation, DataStandardisation, \
-    DataTransformationChain
-from primitives.data_access import RandomSplitSpecs, RotationBasedClassSplit, FoldsGeneratorSpecs
-from primitives.images import ImageSize
-from utils.images import load_image
+from src.config import CLASS_MAPPINGS, BACKGROUNDS_WILDRCARD
+from src.data_access.data_transformations import EntryTransformation, \
+    DataAugmentation, DataStandardisation, DataTransformationChain
+from src.primitives.data_access import RandomSplitSpecs, \
+    RotationBasedClassSplit, FoldsGeneratorSpecs
+from src.primitives.images import ImageSize
+from src.utils.images import load_image
 
-BATCH_SIZE = 32
 
 RANDOM_SPLIT_SPECS = RandomSplitSpecs(
     classes=set(CLASS_MAPPINGS.keys()),
@@ -52,32 +52,35 @@ FOLDS_GENERATOR_SPECS = FoldsGeneratorSpecs(
 )
 
 AUGMENTATIONS = [
-    HorizontalFlip(always_apply=False, p=0.15),
-    VerticalFlip(always_apply=False, p=0.15),
-    Blur(blur_limit=16, always_apply=False, p=0.15),
-    RandomGamma(gamma_limit=(60, 140), always_apply=False, p=0.1),
-    Rotate(limit=35, always_apply=False, p=0.15),
-    ShiftScaleRotate(rotate_limit=35, always_apply=False, p=0.1),
-    OpticalDistortion(distort_limit=1.0, shift_limit=1.0, always_apply=False, p=0.1),
-    GridDistortion(always_apply=False, p=0.1),
-    ElasticTransform(always_apply=False, p=0.1),
-    HueSaturationValue(hue_shift_limit=20, sat_shift_limit=30, val_shift_limit=20, always_apply=False, p=0.1),
-    RGBShift(r_shift_limit=20, g_shift_limit=20, b_shift_limit=20, always_apply=False, p=0.1),
-    RandomBrightness(limit=0.3, always_apply=False, p=0.1),
-    RandomContrast(limit=0.3, always_apply=False, p=0.1),
-    MotionBlur(blur_limit=7, always_apply=False, p=0.1),
-    GaussianBlur(blur_limit=7, always_apply=False, p=0.1),
-    CLAHE(always_apply=False, p=0.1),
-    ChannelShuffle(always_apply=False, p=0.05),
-    ToGray(always_apply=False, p=0.5),
-    JpegCompression(quality_lower=10, quality_upper=100, always_apply=False, p=0.15),
-    Cutout(num_holes=32, max_h_size=12, max_w_size=12, always_apply=False, p=0.07),
-    Downscale(always_apply=False, p=0.2),
-    FancyPCA(alpha=0.4, always_apply=False, p=0.1),
-    Posterize(num_bits=4, always_apply=False, p=0.03),
-    Equalize(always_apply=False, p=0.03),
-    ISONoise(color_shift=(0.1, 0.5), always_apply=False, p=0.07),
-    RandomFog(always_apply=False, p=0.03),
+    HorizontalFlip(p=0.15),
+    VerticalFlip(p=0.15),
+    Blur(blur_limit=16, p=0.15),
+    RandomGamma(gamma_limit=(60, 140), p=0.1),
+    Rotate(limit=35, p=0.15),
+    ShiftScaleRotate(rotate_limit=35, p=0.1),
+    OpticalDistortion(distort_limit=1.0, shift_limit=1.0, p=0.1),
+    GridDistortion(p=0.1),
+    ElasticTransform(p=0.1),
+    HueSaturationValue(
+        hue_shift_limit=20, sat_shift_limit=30, val_shift_limit=20, p=0.1
+    ),
+    RGBShift(
+        r_shift_limit=20, g_shift_limit=20, b_shift_limit=20, p=0.1
+    ),
+    RandomBrightnessContrast(p=0.1),
+    MotionBlur(blur_limit=7, p=0.1),
+    GaussianBlur(blur_limit=7, p=0.1),
+    CLAHE(p=0.1),
+    ChannelShuffle(p=0.05),
+    ToGray(p=0.5),
+    ImageCompression(quality_lower=10, quality_upper=100, p=0.15),
+    CoarseDropout(max_holes=32, max_height=12, max_width=12, p=0.07),
+    Downscale(p=0.2),
+    FancyPCA(alpha=0.4, p=0.1),
+    Posterize(num_bits=4, p=0.03),
+    Equalize(p=0.03),
+    ISONoise(color_shift=(0.1, 0.5), p=0.07),
+    RandomFog(p=0.03),
 ]
 
 TARGET_SIZE_ELEMENT = ImageSize(
@@ -85,8 +88,8 @@ TARGET_SIZE_ELEMENT = ImageSize(
     width=640
 )
 
-backgrounds_paths = glob(BACKGROUNDS_WILDRCARD)
-BACKGROUNDS = [load_image(path, cv.COLOR_BGR2RGB) for path in backgrounds_paths]
+BACKGROUNDS_PATHS = glob(BACKGROUNDS_WILDRCARD)
+BACKGROUNDS = [load_image(path, cv.COLOR_BGR2RGB) for path in BACKGROUNDS_PATHS]
 
 ENTRY_TRANSFORMATION = EntryTransformation(
     class_mapping=CLASS_MAPPINGS,
@@ -97,12 +100,16 @@ ENTRY_TRANSFORMATION = EntryTransformation(
 DATA_AUGMENTATIONS = [
     DataAugmentation(
         transformations=AUGMENTATIONS,
-        global_application_probab=0.7
+        global_application_probab=0.6
     ),
     DataStandardisation()
 ]
 
-TRANSFORMATION_CHAIN = DataTransformationChain(
+TRAINING_TRANSFORMATION_CHAIN = DataTransformationChain(
     entry_transformation=ENTRY_TRANSFORMATION,
     augmentations=DATA_AUGMENTATIONS
+)
+VALIDATION_TRANSFORMATION_CHAIN = DataTransformationChain(
+    entry_transformation=ENTRY_TRANSFORMATION,
+    augmentations=[DataStandardisation()]
 )
