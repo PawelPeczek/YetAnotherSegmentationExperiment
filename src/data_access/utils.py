@@ -1,8 +1,10 @@
 import math
 import os
 from functools import partial, reduce
-from glob import glob
 from typing import Set, Dict, List, Optional, TypeVar, Tuple
+
+from glob import glob
+import numpy as np
 
 from src.config import MASK_EXTENSION, MASK_NAME_POSTFIX, \
     BACKGROUNDS_DIR_NAME, BACKGROUND_CLASS
@@ -184,3 +186,12 @@ def _standardise_class_weighting(class_weighting: Dict[int, float]
         max_value=maximum_coefficient
     )
     return standardise_dictionary_values(dictionary=class_weighting)
+
+
+def convert_class_weighting_to_vector(class_weighting: Dict[int, float]
+                                      ) -> np.ndarray:
+    classes_idx = (class_weighting.keys())
+    result = []
+    for i in range(max(classes_idx) + 1):
+        result.append(class_weighting.get(i, 0.0))
+    return np.array(result, dtype=np.float32)

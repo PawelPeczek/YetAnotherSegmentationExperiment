@@ -1,6 +1,8 @@
 import logging
 import os
 
+from src.primitives.images import ImageSize
+
 LOGGING_LEVEL = logging.INFO
 RESOURCES_PATH = os.path.abspath(os.path.join(
     os.path.dirname(__file__), '..', 'resources'
@@ -8,6 +10,7 @@ RESOURCES_PATH = os.path.abspath(os.path.join(
 MASK_NAME_POSTFIX = "_mask"
 MASK_EXTENSION = "png"
 DATASET_PATH = os.path.join(RESOURCES_PATH, "VISAPP_extended_dataset")
+MODELS_PATH = os.path.join(RESOURCES_PATH, "models")
 ANNOTATIONS_DIR_NAME = 'annotations'
 BACKGROUNDS_DIR_NAME = 'backgrounds'
 BACKGROUNDS_WILDRCARD = os.path.join(DATASET_PATH, BACKGROUNDS_DIR_NAME, "*.jpg")
@@ -21,3 +24,7 @@ CLASS_MAPPINGS = {
     "drill": 5,
     "duck": 6
 }
+MODEL_INPUT_SIZE = ImageSize(
+    height=240,
+    width=320
+)

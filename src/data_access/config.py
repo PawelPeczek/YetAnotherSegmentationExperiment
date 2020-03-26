@@ -8,12 +8,11 @@ from albumentations import (
     RandomBrightnessContrast, ImageCompression, CoarseDropout
 )
 
-from src.config import CLASS_MAPPINGS, BACKGROUNDS_WILDRCARD
+from src.config import CLASS_MAPPINGS, BACKGROUNDS_WILDRCARD, MODEL_INPUT_SIZE
 from src.data_access.data_transformations import EntryTransformation, \
     DataAugmentation, DataStandardisation, DataTransformationChain
 from src.primitives.data_access import RandomSplitSpecs, \
     RotationBasedClassSplit, FoldsGeneratorSpecs
-from src.primitives.images import ImageSize
 from src.utils.images import load_image
 
 
@@ -83,17 +82,12 @@ AUGMENTATIONS = [
     RandomFog(p=0.03),
 ]
 
-TARGET_SIZE_ELEMENT = ImageSize(
-    height=480,
-    width=640
-)
-
 BACKGROUNDS_PATHS = glob(BACKGROUNDS_WILDRCARD)
 BACKGROUNDS = [load_image(path, cv.COLOR_BGR2RGB) for path in BACKGROUNDS_PATHS]
 
 ENTRY_TRANSFORMATION = EntryTransformation(
     class_mapping=CLASS_MAPPINGS,
-    target_size=TARGET_SIZE_ELEMENT,
+    target_size=MODEL_INPUT_SIZE,
     backgrounds=BACKGROUNDS
 )
 

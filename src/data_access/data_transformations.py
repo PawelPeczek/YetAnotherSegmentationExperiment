@@ -66,10 +66,12 @@ class EntryTransformation(DataTransformation):
         )
         class_id = self.__class_mapping[example_description.class_name]
         mask = mask.astype(np.uint8) * class_id
-        return self.__adjust_dataset_example_scale(
+        image, mask = self.__adjust_dataset_example_scale(
             image=image,
             mask=mask
         )
+        mask = np.eye(len(self.__class_mapping) + 1, dtype=mask.dtype)[mask]
+        return image, mask
 
     def __blend_image_with_background(self,
                                       image: np.ndarray,
