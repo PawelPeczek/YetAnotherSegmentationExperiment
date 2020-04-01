@@ -51,35 +51,35 @@ FOLDS_GENERATOR_SPECS = FoldsGeneratorSpecs(
 )
 
 AUGMENTATIONS = [
-    HorizontalFlip(p=0.15),
-    VerticalFlip(p=0.15),
-    Blur(blur_limit=16, p=0.15),
+    HorizontalFlip(p=0.1),
+    VerticalFlip(p=0.1),
+    Blur(blur_limit=16, p=0.1),
     RandomGamma(gamma_limit=(60, 140), p=0.1),
     Rotate(limit=35, p=0.15),
-    ShiftScaleRotate(rotate_limit=35, p=0.1),
-    OpticalDistortion(distort_limit=1.0, shift_limit=1.0, p=0.1),
+    ShiftScaleRotate(rotate_limit=35, p=0.2),
+    OpticalDistortion(distort_limit=1.0, shift_limit=1.0, p=0.2),
     GridDistortion(p=0.1),
-    ElasticTransform(p=0.1),
+    ElasticTransform(p=0.2),
     HueSaturationValue(
-        hue_shift_limit=20, sat_shift_limit=30, val_shift_limit=20, p=0.1
+        hue_shift_limit=20, sat_shift_limit=30, val_shift_limit=20, p=0.2
     ),
     RGBShift(
-        r_shift_limit=20, g_shift_limit=20, b_shift_limit=20, p=0.1
+        r_shift_limit=20, g_shift_limit=20, b_shift_limit=20, p=0.15
     ),
-    RandomBrightnessContrast(p=0.1),
-    MotionBlur(blur_limit=7, p=0.1),
-    GaussianBlur(blur_limit=7, p=0.1),
-    CLAHE(p=0.1),
+    RandomBrightnessContrast(p=0.2),
+    MotionBlur(blur_limit=7, p=0.2),
+    GaussianBlur(blur_limit=7, p=0.15),
+    CLAHE(p=0.05),
     ChannelShuffle(p=0.05),
-    ToGray(p=0.5),
+    ToGray(p=0.1),
     ImageCompression(quality_lower=10, quality_upper=100, p=0.15),
-    CoarseDropout(max_holes=32, max_height=12, max_width=12, p=0.07),
-    Downscale(p=0.2),
+    CoarseDropout(max_holes=32, max_height=12, max_width=12, p=0.05),
+    Downscale(p=0.3),
     FancyPCA(alpha=0.4, p=0.1),
     Posterize(num_bits=4, p=0.03),
-    Equalize(p=0.03),
+    Equalize(p=0.05),
     ISONoise(color_shift=(0.1, 0.5), p=0.07),
-    RandomFog(p=0.03),
+    RandomFog(p=0.03)
 ]
 
 BACKGROUNDS_PATHS = glob(BACKGROUNDS_WILDRCARD)

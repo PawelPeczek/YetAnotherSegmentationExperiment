@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import List, Dict, Optional, Tuple
 
 import numpy as np
@@ -9,17 +9,14 @@ from src.primitives.data_access import DataSetExample, \
     DataSetExampleDescription, DataSetExampleBatch
 from src.primitives.images import ImageSize, DimensionsOrder
 from src.utils.images import load_image, blend_image_with_background
-from src.utils.iterables import random_sample, parallel_map, split_list
+from src.utils.iterables import random_sample, split_list
 
 
 class DataTransformation(ABC):
 
-    def __init__(self, workers_number: int):
-        self._workers = workers_number
-
-    def _convert_parallel_map_result_into_batch_transformation_output(self,
-                                                                      result: List[DataSetExample]
-                                                                      ) -> DataSetExampleBatch:
+    def _convert_map_result_into_batch_transformation_output(self,
+                                                             result: List[DataSetExample]
+                                                             ) -> DataSetExampleBatch:
         images, ground_truths = split_list(to_split=result)
         images_batch = np.stack(images, axis=0)
         ground_truths_batch = np.stack(ground_truths, axis=0)
@@ -31,9 +28,8 @@ class EntryTransformation(DataTransformation):
     def __init__(self,
                  class_mapping: Dict[str, int],
                  target_size: ImageSize,
-                 backgrounds: List[np.ndarray],
-                 workers_number: int = 4):
-        super().__init__(workers_number=workers_number)
+                 backgrounds: List[np.ndarray]
+                 ):
         self.__class_mapping = class_mapping
         self.__target_size = target_size
         self.__backgrounds = backgrounds
@@ -41,12 +37,11 @@ class EntryTransformation(DataTransformation):
     def transform_batch(self,
                         example_descriptions: List[DataSetExampleDescription]
                         ) -> DataSetExampleBatch:
-        batch_result = parallel_map(
-            iterable=example_descriptions,
-            map_function=self.transform_example,
-            workers_number=self._workers
-        )
-        return self._convert_parallel_map_result_into_batch_transformation_output(
+        batch_result = [
+            self.transform_example(example)
+            for example in example_descriptions
+        ]
+        return self._convert_map_result_into_batch_transformation_output(
             result=batch_result
         )
 
@@ -110,9 +105,7 @@ class DataAugmentation(DataTransformation):
 
     def __init__(self,
                  transformations: List[BasicTransform],
-                 global_application_probab: float,
-                 workers_number: int = 8):
-        super().__init__(workers_number)
+                 global_application_probab: float):
         self.__transformation = Compose(
             transformations, p=global_application_probab
         )
@@ -120,12 +113,11 @@ class DataAugmentation(DataTransformation):
     def transform_batch(self,
                         batch: DataSetExampleBatch
                         ) -> DataSetExampleBatch:
-        batch_result = parallel_map(
-            iterable=zip(*batch),
-            map_function=self.transform_example,
-            workers_number=self._workers
-        )
-        return self._convert_parallel_map_result_into_batch_transformation_output(
+        batch_result = [
+            self.transform_example(dataset_example)
+            for dataset_example in zip(*batch)
+        ]
+        return self._convert_map_result_into_batch_transformation_output(
             result=batch_result
         )
 
@@ -141,8 +133,7 @@ class DataStandardisation(DataAugmentation):
 
     def __init__(self,
                  mean: Tuple[float, float, float] = (0.485, 0.456, 0.406),
-                 std: Tuple[float, float, float] = (0.229, 0.224, 0.225),
-                 workers_number: int = 2):
+                 std: Tuple[float, float, float] = (0.229, 0.224, 0.225)):
         transformations = [
             ToFloat(max_value=255.0),
             Normalize(mean=mean, std=std, max_pixel_value=1.0)
@@ -150,7 +141,6 @@ class DataStandardisation(DataAugmentation):
         super().__init__(
             transformations=transformations,
             global_application_probab=1.0,
-            workers_number=workers_number
         )
 
 
@@ -160,7 +150,6 @@ class DataTransformationChain(DataTransformation):
                  entry_transformation: EntryTransformation,
                  augmentations: List[DataAugmentation]
                  ):
-        super().__init__(workers_number=1)
         self.__chain = [entry_transformation]
         self.__chain.extend(augmentations)
 

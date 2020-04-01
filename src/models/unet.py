@@ -21,7 +21,8 @@ class UNet:
             filters=1024,
             kernel_size=(3, 3),
             padding="same",
-            name="filter_extraction_conv"
+            name="filter_extraction_conv",
+            activation="relu"
         )(sub_sampling_out)
         filter_extraction_conv_bn = BatchNormalization(
             name=f"filter_extraction_conv_bn"
@@ -30,7 +31,8 @@ class UNet:
             filters=512,
             kernel_size=(3, 3),
             padding="same",
-            name="up_sampling_input"
+            name="up_sampling_input",
+            activation="relu"
         )(filter_extraction_conv_bn)
         up_sampling_output = self.__build_up_sampling_stack(
             x=up_sampling_input,
@@ -73,7 +75,8 @@ class UNet:
                 filters=num_filters,
                 kernel_size=(3, 3),
                 padding="same",
-                name=f"{stack_name}_{i+1}"
+                name=f"{stack_name}_{i+1}",
+                activation="relu"
             )(x)
         x = BatchNormalization(name=f"{stack_name}_bn")(x)
         return x
@@ -101,7 +104,8 @@ class UNet:
             filters=up_sampled_smaller_input.shape[-1].value // 2,
             kernel_size=(2, 2),
             padding="same",
-            name=f"up_sample_bottleneck_conv_{block_idx}"
+            name=f"up_sample_bottleneck_conv_{block_idx}",
+            activation="relu"
         )(up_sampled_smaller_input)
         x = Concatenate(name=f"up_sample_concat_{block_idx}")(
             [bottleneck_conv, bigger_input]
@@ -112,6 +116,7 @@ class UNet:
                 filters=conv_3x3_filters,
                 kernel_size=(3, 3),
                 padding="same",
-                name=f"up_sample_{block_idx}_conv_3x3_{idx+1}"
+                name=f"up_sample_{block_idx}_conv_3x3_{idx+1}",
+                activation="relu"
             )(x)
         return x

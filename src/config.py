@@ -25,6 +25,6 @@ CLASS_MAPPINGS = {
     "duck": 6
 }
 MODEL_INPUT_SIZE = ImageSize(
-    height=240,
-    width=320
+    height=128,
+    width=128
 )
