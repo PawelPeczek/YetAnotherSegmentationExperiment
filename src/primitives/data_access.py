@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import Set, List, Dict, Optional, Tuple, Generator
 import numpy as np
 
@@ -22,6 +23,7 @@ class RandomSplitSpecs:
 class FoldsGeneratorSpecs:
     random_split_specs: RandomSplitSpecs
     rotation_based_splits: List[RotationBasedClassSplit]
+    allowed_background_wildcard: str = None
 
 
 @dataclass(frozen=True)

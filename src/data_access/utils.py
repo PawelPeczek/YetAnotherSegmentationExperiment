@@ -50,7 +50,7 @@ def get_dataset_images_by_classes(dataset_path: str,
     )
     image_classes = (extract_class(p) for p in images_without_masks)
     dict_specs = (
-        (class_name, path) 
+        (class_name, path)
         for class_name, path in zip(image_classes, images_without_masks)
         if class_name is not None and class_name in classes
     )
@@ -125,18 +125,23 @@ def calculate_classes_balance(examples_by_class: ExampleDescriptionsByClass
 
 
 def assign_backgrounds_to_examples(examples: List[DataSetExampleDescription],
-                                   data_set_dir: str
+                                   data_set_dir: str,
+                                   background_wildcard: str = None
                                    ) -> List[DataSetExampleDescription]:
     return [
-        assign_background_to_example(example, data_set_dir)
+        assign_background_to_example(example, data_set_dir, background_wildcard)
         for example in examples
     ]
 
 
 def assign_background_to_example(example: DataSetExampleDescription,
-                                 data_set_dir: str
+                                 data_set_dir: str,
+                                 background_wildcard: str = None
                                  ) -> DataSetExampleDescription:
-    background_path = sample_background_path(data_set_dir=data_set_dir)
+    background_path = sample_background_path(
+        data_set_dir=data_set_dir,
+        background_wildcard=background_wildcard
+    )
     return DataSetExampleDescription(
         image_path=example.image_path,
         class_name=example.class_name,
@@ -144,10 +149,11 @@ def assign_background_to_example(example: DataSetExampleDescription,
     )
 
 
-def sample_background_path(data_set_dir: str) -> str:
-    background_wildcard = os.path.join(
-        data_set_dir, BACKGROUNDS_DIR_NAME, "*.jpg"
-    )
+def sample_background_path(data_set_dir: str, background_wildcard: str = None) -> str:
+    if background_wildcard is None:
+        background_wildcard = os.path.join(
+            data_set_dir, BACKGROUNDS_DIR_NAME, "*.jpg"
+        )
     backgrounds = glob(background_wildcard)
     if len(backgrounds) == 0:
         raise RuntimeError("Cannot find backgrounds.")

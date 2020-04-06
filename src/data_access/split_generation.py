@@ -17,10 +17,14 @@ class SplitGenerator(ABC):
 
     def __init__(self, dataset_path: str):
         self._dataset_path = dataset_path
+        self._allowed_backgrounds_wildcard = None
 
     @abstractmethod
     def generate_splits(self) -> DataSetSplitGenerator:
         pass
+
+    def set_backround_wildcard(self, backgrounds_wildcard: str) -> None:
+        self._allowed_backgrounds_wildcard = backgrounds_wildcard
 
     def _prepare_dataset_split(self,
                                name: str,
@@ -45,7 +49,8 @@ class SplitGenerator(ABC):
                                         ) -> DataSetSplitDescription:
         examples_with_fixed_backgrounds = assign_backgrounds_to_examples(
             examples=test_split.examples,
-            data_set_dir=self._dataset_path
+            data_set_dir=self._dataset_path,
+            background_wildcard=self._allowed_backgrounds_wildcard
         )
         return DataSetSplitDescription(
             examples=examples_with_fixed_backgrounds,
