@@ -83,9 +83,10 @@ class DetailedDatasetHandler:
             generator_specs=folds_generator_specs
         )
 
-    def prepare_generators_and_transformations(self) -> List[Tuple[FoldsGenerator, DataTransformationChain]]:
+    def prepare_generators_and_transformations(self, standarize: bool = False, augument: bool = False) -> List[Tuple[FoldsGenerator, DataTransformationChain]]:
         return [
-            (self.generate_folds_generator(clazz), self.__generate_transformation_chain(clazz))
+            (self.generate_folds_generator(clazz),
+             self.__generate_transformation_chain(clazz, standarize, augument))
             for clazz in self._classes
         ]
 
@@ -95,4 +96,20 @@ class DetailedDatasetHandler:
              self.__generate_transformation_chain(clazz, standarize, augument))
             for clazz in self._classes
         ]
+
+    def prepare_train_test_datasets(self, standarize: bool = False, augument: bool = False) -> Tuple[List[Tuple[List[DataSetExampleDescription], DataTransformationChain]], List[Tuple[List[DataSetExampleDescription], DataTransformationChain]]]:
+        generators_and_chains = self.prepare_generators_and_transformations(standarize, augument)
+        folds_and_chains = list(map(
+            lambda gen_chain: (next(gen_chain[0].generate_folds()), gen_chain[1]), generators_and_chains
+        ))
+        train_chain = list(map(
+            lambda folds_chain: (folds_chain[0].training_set.examples, folds_chain[1]), folds_and_chains
+        ))
+        test_chain = list(map(
+            lambda folds_chain: (folds_chain[0].test_set.examples, folds_chain[1]), folds_and_chains
+        ))
+
+        return train_chain, test_chain
+
+
 
