@@ -2,7 +2,7 @@ from glob import glob
 import cv2 as cv
 from albumentations import (
     HorizontalFlip, VerticalFlip, Blur, RandomGamma, Rotate, ShiftScaleRotate,
-    OpticalDistortion, GridDistortion, ElasticTransform, HueSaturationValue,
+    OpticalDistortion, HueSaturationValue,
     RGBShift, MotionBlur, GaussianBlur, CLAHE, ChannelShuffle, ToGray,
     Downscale, FancyPCA, Posterize, Equalize, ISONoise, RandomFog,
     RandomBrightnessContrast, ImageCompression, CoarseDropout
@@ -18,7 +18,7 @@ from src.utils.images import load_image
 
 RANDOM_SPLIT_SPECS = RandomSplitSpecs(
     classes=set(CLASS_MAPPINGS.keys()),
-    splits_number=1,
+    splits_number=8,
     training_samples_factor=0.8
 )
 
@@ -40,14 +40,69 @@ TEST_ANGLES = {
     "duck": {30}
 }
 
-ROTATION_BASED_CLASS_SPLIT = RotationBasedClassSplit(
-    training_angles=TRAINING_ANGLES,
-    test_angles=TEST_ANGLES
+ROTATION_BASED_CLASS_SPLIT_1 = RotationBasedClassSplit(
+    training_angles={
+        "adapter": {0, 30, 90},
+        "bottle": {0, 60},
+        "box": {0, 60},
+        "clamp": {0, 60},
+        "drill": {0, 30, 90},
+        "duck": {0, 60}
+    },
+    test_angles={
+        "adapter": {60},
+        "bottle": {30},
+        "box": {30},
+        "clamp": {30},
+        "drill": {60},
+        "duck": {30}
+    }
+)
+ROTATION_BASED_CLASS_SPLIT_2 = RotationBasedClassSplit(
+    training_angles={
+        "adapter": {0, 60, 90},
+        "bottle": {0, 30},
+        "box": {0, 30},
+        "clamp": {0, 30},
+        "drill": {0, 60, 90},
+        "duck": {0, 30}
+    },
+    test_angles={
+        "adapter": {30},
+        "bottle": {60},
+        "box": {60},
+        "clamp": {60},
+        "drill": {30},
+        "duck": {60}
+    }
+)
+
+ROTATION_BASED_CLASS_SPLIT_3 = RotationBasedClassSplit(
+    training_angles={
+        "adapter": {30, 60, 90},
+        "bottle": {30, 60},
+        "box": {30, 60},
+        "clamp": {30, 60},
+        "drill": {30, 60, 90},
+        "duck": {30, 60}
+    },
+    test_angles={
+        "adapter": {0},
+        "bottle": {0},
+        "box": {0},
+        "clamp": {0},
+        "drill": {0},
+        "duck": {0}
+    }
 )
 
 FOLDS_GENERATOR_SPECS = FoldsGeneratorSpecs(
     random_split_specs=RANDOM_SPLIT_SPECS,
-    rotation_based_splits=[ROTATION_BASED_CLASS_SPLIT]
+    rotation_based_splits=[
+        ROTATION_BASED_CLASS_SPLIT_1,
+        ROTATION_BASED_CLASS_SPLIT_2,
+        ROTATION_BASED_CLASS_SPLIT_3
+    ]
 )
 
 AUGMENTATIONS = [
