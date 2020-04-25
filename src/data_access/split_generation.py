@@ -23,7 +23,7 @@ class SplitGenerator(ABC):
     def generate_splits(self) -> DataSetSplitGenerator:
         pass
 
-    def set_backround_wildcard(self, backgrounds_wildcard: str) -> None:
+    def set_background_wildcard(self, backgrounds_wildcard: str) -> None:
         self._allowed_backgrounds_wildcard = backgrounds_wildcard
 
     def _prepare_dataset_split(self,

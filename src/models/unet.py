@@ -6,11 +6,10 @@ from tensorflow.python.keras.engine.training import Model
 from tensorflow.python.keras.layers import Conv2D, UpSampling2D, Concatenate, \
     MaxPooling2D, Softmax, BatchNormalization
 
+from src.models.base import SegmentationModel
 
-class UNet:
 
-    def __init__(self, num_classes: int):
-        self.__num_classes = num_classes
+class UNet(SegmentationModel):
 
     def build_model(self, input_shape: Tuple[int, int, int]) -> Model:
         x = Input(shape=input_shape, name="input")
@@ -39,7 +38,7 @@ class UNet:
             sub_sampling_stack=sub_sampling_stack
         )
         out = Conv2D(
-            filters=self.__num_classes,
+            filters=self._num_classes,
             kernel_size=(1, 1),
             padding="same",
             name="output"

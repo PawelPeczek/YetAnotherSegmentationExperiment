@@ -58,8 +58,6 @@ AUGMENTATIONS = [
     Rotate(limit=35, p=0.15),
     ShiftScaleRotate(rotate_limit=35, p=0.2),
     OpticalDistortion(distort_limit=1.0, shift_limit=1.0, p=0.2),
-    GridDistortion(p=0.1),
-    ElasticTransform(p=0.2),
     HueSaturationValue(
         hue_shift_limit=20, sat_shift_limit=30, val_shift_limit=20, p=0.2
     ),

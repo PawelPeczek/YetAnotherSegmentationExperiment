@@ -149,3 +149,9 @@ def standardise_dictionary_values(dictionary: Dict[K, Union[int, float]]
     for key in dictionary:
         dictionary[key] /= values_sum
     return dictionary
+
+
+def fetch_index_from_list_of_tuples(list_of_tuples: List[tuple],
+                                    index: int
+                                    ) -> List[Any]:
+    return [e[index] for e in list_of_tuples]
