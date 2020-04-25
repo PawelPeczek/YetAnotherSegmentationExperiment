@@ -1,5 +1,6 @@
 import logging
 import os
+import numpy as np
 
 from src.primitives.images import ImageSize
 
@@ -25,6 +26,15 @@ CLASS_MAPPINGS = {
     "drill": 5,
     "duck": 6
 }
+CLASS_TO_COLORS = np.array([
+    (0, 0, 0),
+    (255, 0, 0),
+    (0, 255, 0),
+    (255, 0, 255),
+    (255, 255, 0),
+    (0, 255, 255),
+    (127, 127, 127)
+])
 MODEL_INPUT_SIZE = ImageSize(
     height=128,
     width=128

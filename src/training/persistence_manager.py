@@ -57,7 +57,7 @@ class PersistenceManager:
         return split_dir
 
     def persist_model_history(self, split_dir: str, history: History) -> None:
-        history_path = os.path.join(split_dir, training_config.HISTORY_PATH)
+        history_path = os.path.join(split_dir, training_config.HISTORY_FILE_NAME)
         history_dict = {
             key: [v.item() for v in value]
             for key, value in history.history.items()
