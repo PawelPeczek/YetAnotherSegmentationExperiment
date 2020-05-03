@@ -11,7 +11,6 @@ RESOURCES_PATH = os.path.abspath(os.path.join(
 MASK_NAME_POSTFIX = "_mask"
 MASK_EXTENSION = "png"
 DATASET_PATH = os.path.join(RESOURCES_PATH, "VISAPP_extended_dataset")
-MODELS_PATH = os.path.join(RESOURCES_PATH, "models")
 EXPERIMENTS_OUTPUT_DIR = os.path.join(RESOURCES_PATH, "experiments")
 ANNOTATIONS_DIR_NAME = 'annotations'
 BACKGROUNDS_DIR_NAME = 'backgrounds'
@@ -25,6 +24,14 @@ CLASS_MAPPINGS = {
     "clamp": 4,
     "drill": 5,
     "duck": 6
+}
+CLASS_MAPPINGS_REVERTED = {
+    1: "adapter",
+    2: "bottle",
+    3: "box",
+    4: "clamp",
+    5: "drill",
+    6: "duck"
 }
 CLASS_TO_COLORS = np.array([
     (0, 0, 0),
