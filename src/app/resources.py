@@ -10,8 +10,9 @@ from tensorflow.python.keras import Model
 import tensorflow as tf
 from tensorflow.python.keras.backend import set_session
 
-from primitives.segmentation_result import SegmentationResult, SegmentationResults
-from utils.api import image_from_str
+from src.primitives.segmentation_result import \
+    SegmentationResult, SegmentationResults
+from src.utils.api import image_from_str
 
 logging.getLogger().setLevel(logging.INFO)
 

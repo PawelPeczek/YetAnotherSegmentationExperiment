@@ -34,13 +34,13 @@ CLASS_MAPPINGS_REVERTED = {
     6: "duck"
 }
 CLASS_TO_COLORS = np.array([
-    (0, 0, 0),
+    (127, 127, 127),
     (255, 0, 0),
     (0, 255, 0),
     (255, 0, 255),
     (255, 255, 0),
     (0, 255, 255),
-    (127, 127, 127)
+    (249, 215, 28)
 ])
 MODEL_INPUT_SIZE = ImageSize(
     height=128,

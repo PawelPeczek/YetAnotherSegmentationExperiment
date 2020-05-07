@@ -1,11 +1,10 @@
-from typing import List
-
 import requests
 from flask import Response
 
 from src.primitives.api import ServiceSpecs
-from primitives.segmentation_result import SegmentationResult, SegmentationResults
-from src.utils.api import image_to_jpeg_bytes, compose_url, compose_url_with_http_prefix
+from src.primitives.segmentation_result import\
+    SegmentationResult, SegmentationResults
+from src.utils.api import image_to_jpeg_bytes, compose_url_with_http_prefix
 from src.app.config import SEGMENTATION_ENDPOINT
 from src.app.errors import RequestProcessingError
 

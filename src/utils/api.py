@@ -1,7 +1,7 @@
 import numpy as np
 import cv2 as cv
 
-from primitives.api import ServiceSpecs
+from src.primitives.api import ServiceSpecs
 
 
 def compose_url_with_http_prefix(service_specs: ServiceSpecs,
