@@ -137,7 +137,7 @@ class RotationBasedSplitGenerator(SplitGenerator):
         )
         test_set_paths = extract_and_merge_dictionary_sub_groups(
             dictionary=grouped_dataset,
-            to_extract=split_specs.training_angles
+            to_extract=split_specs.test_angles
         )
         return training_set_paths, test_set_paths
 

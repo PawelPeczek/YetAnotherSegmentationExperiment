@@ -136,7 +136,7 @@ class TrainingAdvisor:
         )
         logging.info(f"Model saving path: {split_dir}")
         checkpoint_callback = ModelCheckpoint(
-            os.path.join(split_dir, "weights.hdf5"),
+            os.path.join(split_dir, training_config.WEIGHTS_FILE_NAME),
             save_best_only=True,
             verbose=True
         )
