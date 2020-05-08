@@ -26,3 +26,20 @@ class SegmentationResult:
 
 
 SegmentationResults = List[SegmentationResult]
+
+
+@dataclass
+class ColorfulSegmentationResult:
+    class_mask: np.ndarray
+
+    def to_dict(self) -> Dict:
+        return {
+            'mask': self.class_mask.tolist()
+        }
+
+    @classmethod
+    def from_dict(cls, segmentation_result_dict):
+        class_mask = segmentation_result_dict['mask']
+        return cls(
+            class_mask=np.asarray(class_mask)
+        )
