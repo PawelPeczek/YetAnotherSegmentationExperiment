@@ -1,6 +1,7 @@
 import numpy as np
 import cv2 as cv
 
+from src.config import CLASS_TO_COLORS
 from src.primitives.api import ServiceSpecs
 
 
@@ -42,3 +43,7 @@ def image_to_jpeg_bytes(image: np.ndarray,
 def image_from_str(raw_image: str) -> np.ndarray:
     data = np.fromstring(raw_image, dtype=np.uint8)
     return cv.imdecode(data, cv.IMREAD_COLOR)
+
+
+def map_color(class_map: np.ndarray) -> np.ndarray:
+    return CLASS_TO_COLORS[class_map]

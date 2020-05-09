@@ -21,9 +21,9 @@ DISCOVERY_SERVICE_SPECS = ServiceSpecs(
 VERIFY_SERVICE_IDENTITY_PATH = 'verify_service_identity'
 LOCATE_SERVICES_PATH = 'locate_services'
 SEGMENTATION_ENDPOINT = 'object_segmentation'
-# WEIGHTS_PATH = os.path.join(RESOURCES_PATH, "weights", "weights.hdf5")
-WEIGHTS_PATH = "/home/ppeczek/Dokumenty/YetAnotherSegmentationExperiment/" \
-               "resources/experiments/test_experiment_v1/ic_net/random_split_#0/" \
-               "weights.hdf5"
+COLORFUL_SEGMENTATION_ENDPOINT = 'colorful_object_segmentation'
+WEIGHTS_PATH = os.path.join(RESOURCES_PATH, "weights", "weights.hdf5")
+# WEIGHTS_PATH = "/home/mdronski/IET/semestr-8/UczenieMaszyn/YetAnotherSegmentationExperiment/resources/experiments" \
+#                "/test_experiment_v1/ic_net/random_split_#0/weights.hdf5 "
 
 CONFIDENCE_THRESHOLD = 0.8
