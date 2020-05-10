@@ -1,6 +1,5 @@
 import tensorflow.python.keras.backend as K
-from tensorflow.python.keras.losses import binary_crossentropy
-import numpy as np
+from tensorflow.python.keras.losses import categorical_crossentropy
 
 
 def dice_loss(y_true, y_pred):
@@ -11,5 +10,5 @@ def dice_loss(y_true, y_pred):
     return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
 
 
-def bce_dice_loss(y_true, y_pred):
-    return binary_crossentropy(y_true, y_pred) + (1 - dice_loss(y_true, y_pred))
+def ce_dice_loss(y_true, y_pred):
+    return categorical_crossentropy(y_true, y_pred) + (1 - dice_loss(y_true, y_pred))

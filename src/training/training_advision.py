@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import List, Tuple
+from typing import List, Tuple, Callable
 import logging
 
 from tensorflow.python.keras.callbacks import ModelCheckpoint
@@ -11,7 +11,7 @@ import tensorflow as tf
 from src.data_access.data_generation import DataGenerator
 from src.data_access.data_transformations import DataTransformationChain
 from src.data_access.folds_generation import FoldsGenerator
-from src.evaluation.losses.dice import bce_dice_loss, dice_loss
+from src.evaluation.losses.dice import ce_dice_loss, dice_loss
 from src.models.base import SegmentationModel
 from src.primitives.data_access import DataSetSplit
 from src.training.persistence_manager import PersistenceManager
@@ -20,6 +20,8 @@ import src.training.config as training_config
 
 
 logging.getLogger().setLevel(logging.INFO)
+
+LossFunction = Callable[[tf.Tensor, tf.Tensor], tf.Tensor]
 
 
 class TrainingAdvisor:
@@ -42,7 +44,7 @@ class TrainingAdvisor:
             epoch_num=epoch_num,
             optimizer=optimizer,
             training_set_transformation_chain=training_set_transformation_chain,
-            test_set_transformation_chain=test_set_transformation_chain
+            test_set_transformation_chain=test_set_transformation_chain,
         )
 
     def __init__(self,
@@ -52,7 +54,7 @@ class TrainingAdvisor:
                  epoch_num: int,
                  optimizer: str,
                  training_set_transformation_chain: DataTransformationChain,
-                 test_set_transformation_chain: DataTransformationChain
+                 test_set_transformation_chain: DataTransformationChain,
                  ):
         self.__persistence_manager = persistence_manager
         self.__input_shape = input_shape
@@ -66,7 +68,7 @@ class TrainingAdvisor:
     def execute_training(self,
                          experiment_name: str,
                          folds_generator: FoldsGenerator,
-                         models_to_train: List[Tuple[str, SegmentationModel]]
+                         models_to_train: List[Tuple[str, SegmentationModel, LossFunction]]
                          ) -> None:
         self.__prepare_storage(
             experiment_name=experiment_name,
@@ -81,7 +83,7 @@ class TrainingAdvisor:
 
     def __prepare_storage(self,
                           experiment_name: str,
-                          models_to_train: List[Tuple[str, SegmentationModel]]):
+                          models_to_train: List[Tuple[str, SegmentationModel, LossFunction]]):
         model_names = fetch_index_from_list_of_tuples(
             list_of_tuples=models_to_train,
             index=0
@@ -93,13 +95,14 @@ class TrainingAdvisor:
 
     def __execute_models_training(self,
                                   experiment_name: str,
-                                  models_to_train: List[Tuple[str, SegmentationModel]],
+                                  models_to_train: List[Tuple[str, SegmentationModel, LossFunction]],
                                   dataset_split: DataSetSplit
                                   ) -> None:
-        for model_name, segmentation_model in models_to_train:
+        for model_name, segmentation_model, loss_function in models_to_train:
             self.__execute_model_training(
                 experiment_name=experiment_name,
                 model_name=model_name,
+                loss_function=loss_function,
                 segmentation_model=segmentation_model,
                 dataset_split=dataset_split
             )
@@ -107,6 +110,7 @@ class TrainingAdvisor:
     def __execute_model_training(self,
                                  experiment_name: str,
                                  model_name: str,
+                                 loss_function: LossFunction,
                                  segmentation_model: SegmentationModel,
                                  dataset_split: DataSetSplit
                                  ) -> None:
@@ -152,7 +156,7 @@ class TrainingAdvisor:
         )
         segmentation_model.compile(
             optimizer="adam",
-            loss=bce_dice_loss,
+            loss=loss_function,
             metrics=[dice_loss]
         )
         history = segmentation_model.fit_generator(

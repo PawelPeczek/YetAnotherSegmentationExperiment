@@ -36,6 +36,19 @@ To generate masks:
 python -m src.convert_data
 ```
 
+## Content navigation
+Features provided in this code-base:
+* On-line data augmentation - [example](notebooks/AugmentationExperiments.ipynb)
+* Dataset splits generation - [example](notebooks/FoldsGenerationDemo.ipynb)
+* Automated training of various semantic segmentation models with progress tracing - [example](notebooks/TrainingWrapper.ipynb)
+* Automated validation of model performance with detailed results tracing - [example](notebooks/TrainingResultsAnalysis.ipynb)
+* Training history plotting - [example](notebooks/TrainingHistoryVisualisation.ipynb)
+* LaTeX generator for evaluation results tables - [example](notebooks/LatexTablesGenerator.ipynb)
+
+We prepared a [report](report.pdf) formed in a way as research papers are prepared. 
+This report, however, is not intended to be published as the experiment was 
+intended to check negative results.
+
 
 ## Citations
 ```

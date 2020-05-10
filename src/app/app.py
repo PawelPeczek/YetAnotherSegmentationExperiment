@@ -13,9 +13,9 @@ from src.app.config import SERVICE_NAME, API_VERSION, \
     WEIGHTS_PATH, CONFIDENCE_THRESHOLD, SEGMENTATION_ENDPOINT, COLORFUL_SEGMENTATION_ENDPOINT
 
 from tensorflow.python.keras.utils.generic_utils import get_custom_objects
-from src.evaluation.losses.dice import dice_loss, bce_dice_loss
+from src.evaluation.losses.dice import dice_loss, ce_dice_loss
 
-get_custom_objects().update({"bce_dice_loss": bce_dice_loss})
+get_custom_objects().update({"bce_dice_loss": ce_dice_loss})
 get_custom_objects().update({"dice_loss": dice_loss})
 
 
