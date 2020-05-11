@@ -15,8 +15,10 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{hhline}
+\usepackage{gensymb}
 \graphicspath{ {./images/} }
-
+\usepackage{caption}
+\captionsetup[table]{skip=10pt}
 
 \title{Features of deep learning models in context of semantic segmentation task}
 
@@ -53,8 +55,7 @@ Empowered by modern GPU units, Deep Learning (DL) models are able to achieve out
 Research effort on improving current state-of-the-art semantic segmentation methods is important due to possible applications of systems based on models or algorithms that solve the task. Such systems can be utilized to improve autonomous vehicles by ensuring more comprehensive surroundings understanding. What is more, in the field of medical imaging there is a chance to develop systems to assess wide range of scans without human supervision. This application may have tangible effect on the quality of treatment and effectiveness of medical screening. Nevertheless, the general and robust method for solving semantic segmentation challenge is not yet known. The task complexity lays in wide range and high variety of visual scenes that may be segmentation input. Such scenes may contain very different objects both among different possible images and within a particular example. Objects scale variety is also potential challenge. Additionally, a truly robust semantic segmentation solution should also grasp the semantic dependency between objects inside image. For instance high building in urban scene should be recognized as \textit{skyscraper}, whereas large building in industry context probably as \textit{factory}. Unfortunately, CNNs (even particularly deep) cannot solve all mentioned issues without improvements in their architectures or training methods. 
 
 \paragraph{}
-DO ZMIANY!!!\newline
-In this work we evaluated several features of CNNs that may be important in context of improving models solving semantic segmentation task. In particular, we tried to evaluate the nature of visual features learned by CNN while training w. r. t. semantic segmentation objective and compare them with ones reported to be learned by CNN trained w. r. t. classification objective. The goal of this evaluation is to verify the correctness of an approach to reuse models pre-trained on image classification as features encoders in semantic segmentation task. Apart from that, we evaluated the possibility of achieving non-supervised pre-training for semantic segmentation with use of convolutional Auto Encoder (AE), as well as we started discussion about the correctness of choice optimization method for semantic segmentation by comparing a model training convergence between one of the most popular optimizer (SGD with Momentum \cite{sgd_mom}) with a novel one called AdamW \cite{adamw}. We have chosen CityScapes \cite{cityscapes} data set as a baseline for our experiments due to the fact that it contains complex real scenes. To narrowed resources requirements of this work we decided to choose ICNet \cite{icnet} as a baseline architecture.
+In this paper we would like to describe our approach to crealte and train convolutional neural network fo real-time semantic segmentation. Currently, it is not possible to create a complicated model of a convolution network that gives good results while allowing real-time inference with a frequency of several dozen frames per second, so a compromise between the complexity of the model and the inference time is necessary. As part of the task we had at our disposal a very small dataset VISAPP \cite{visapp} containing objects with no backgrounds, belonging to six different classes shown under different angles and a set of backgrounds used for image creation. Limited dataset size forced us to use a large number of synthetic dataset augumentation. We have evaluated and compared two deep learning models: state-of-the-art architecture called  ICNet proposed in \cite{icnet} and one of the first and well-known semantic segmentation network U-Net proposed in\cite{unet}. In addition, we examined how the limited size of a training set affects the quality and stability of model segmentation.
 
 \paragraph{}
 The structure of this work is the following. Section \ref{sec:related_work} contain detailed description of state-of-the-art methods for semantic segmentation. In Section \ref{sec:method} we present the research methodology used to obtain results which are outlined in Section \ref{sec:conclusions}. Conclusions, general observations and proposals for further work are presented in Section \ref{sec:conclusions}.  
@@ -90,11 +91,85 @@ U-shape network architecture used as design pattern when creating various semant
 \paragraph{}
 Transfer learning is a common practice in wide range of Machine Learning application. Oršić et al. in \cite{swift_net} proposed an architecture utilizing ImageNet pre-trained features to achieve better performance on target task. Pretrained model serves as features encoder, whereas upsampling decoder is jointly trained from scratch on semantic segmentation task. At the end of encoder (in order to increase receptive field under real-time inference regime), simplified version of Spatial Pyramid Pooling block (inspired by one proposed in \cite{psp}) is attached. Decoder is composed of blocks with two inputs - one for previous encoder block output and second for corresponding encoder output (transformed by 1x1 conv). Thanks to ImageNet pretraining, the model achieves 75.5\% mIoU on CityScapes \cite{cityscapes} (validation set) and 39.9 fps inference speed (GTX 1080Ti) on full-size (1024x2048) input. What is more interesting - the same architecture without pretraining achieves  70.4\% mIoU on CityScapes (validation set), which is less than \cite{icnet}. When training without real-time constraint, 76.5\% mIoU on the same dataset was achieved.
 
+\clearpage
+
 \section{Method}
 \label{sec:method}
+\subsection{Evaluated convolutional neural network models}
+\label{sec:evaluated_models}
+
+\begin{figure}[!htb]
+    \centering
+  \includegraphics[width=10cm, keepaspectratio]{images/u-net-architecture.png}
+  \caption{U-Net~\cite{unet} architecture}
+  \label{fig:u-net-architecture}
+\end{figure}
+
+Opis unet
+
+\begin{figure}[!htb]
+    \centering
+  \includegraphics[width=10cm, keepaspectratio]{images/i-cnet-architecture.png}
+  \caption{ICNet~\cite{icnet} architecture}
+  \label{fig:i-cnet-architecture}
+\end{figure}
+
+Opis icnet
+
+It is important to emphasize the significant difference in the number of trainable parameters between ICnet and U-net. Our implementation of ICNet has about 960 000 parameters, which is very small for a convolutional neural network, while U-net has significantly more parameters, as much as about 24 000 000. Comparing the number of parameters, we can see that IOcnet is 25 times smaller than U-net, which suggests that the ICnet will have a much shorter time of inference.
+
+\clearpage
+
+\subsection{Dataset description}
+\label{sec:dataset_desc}
+The VISAPP~\cite{visapp} data set we use contains six classes of objects: \textit{adapter}, \textit{bottle}, \textit{box}, \textit{clamb}, \textit{drill} and \textit{duck}. Each class is divided into subclasses depending on the angle at which the object is presented. All classes are shown at \textit{0\degree}, \textit{30\degree} and \textit{60\degree}, while the adapter and drill additionally at \textit{90\degree}. All elements of the set are raw objects without a background, which were deprived during preprocessing. VISAPP~\cite{visapp} contains an additional folder with backgrounds allowing to generate synthetic images of the same objects on different backgrounds, so there is possibility to  generate far more trainning set elements. Initially, not all classes had annotations about angles, so they were divided into angle subclasses manually.
+
+\begin{center}
+\begin{table}[H]
+\centering
+\tiny \renewcommand{\arraystretch}{1.5}
+\begin{tabular}
+{ |c|c|c|c|c||c| } \hline Class name & $0\degree$ & $30\degree$ & $60\degree$ & $90\degree$ & $All$  \\ [1.05ex] \hline
+$adapter$ &  36 & 36 & 36 & 36 & 144 \\ \hline
+$bottle$ &  26 & 27 & 48 & 0 & 101 \\ \hline
+$box$ &  12 & 34 & 14 & 0 & 60 \\ \hline
+$clamb$ &  12 & 41 & 54 & 0 & 107 \\ \hline
+$drill$ &  19 & 36 & 36 & 49 & 140 \\ \hline
+$duck$ &  11 & 33 & 50 & 0 & 94 \\ \hline
+\end{tabular}
+\caption{VISAPP\cite{visapp} dataset distribution}
+\label{tab:visapp_class_distribution}
+\end{table}
+\end{center}
+
+MIEJSCE NA PRZYKŁADOWE OBRAZKI ZE ZBIORU DANYCH (BEZ TŁA, SAMO TŁO, Z TŁEM, ROTACJA)
 
 \subsection{Training strategy}
-DO OPISANIA SPOSÓB PODZIAŁU NA FOLDY, włącznie z konkretnymi wartościami kątów - trzeba wspomnieć, że dla klas, dla których nie dysponowaliśmy konkretnymi anotacjami ustaliliśmy podział zgrubnie. Trzeba też wspomnieć że wiemy, że zaburza to train-test data distribution, ale zrobiliśmy tak dla sprawdzenia jak "roboust" są modele, jak dobrze generalizują na nieznane przypadki i w ogólności dla zbadania jak wrażliwe są modele segmentacji trenowane na małej ilości danych na takie delikatne shifty perspektywy. Każdy model był trenowany 32 epoki. Opis klas z data setu. Każdy model był trenowany na tym samym podziale danych w danej turze. Opis datasetu - ile przykładów, jakie klasy, SZTUCZNE TŁA - fajnie by było wrzucić kilka obrazków. ICNET i UNET dostosowane do potrzeb tego datasetu - podać liczbę parametrów.
+\label{sec:train_strategy}
+We have implemented custom dataset fold generation for training and tests datasets. A single fold consists of a training and test set. The training set was created on the basis of objects present in VISAPP \cite{visapp}, to which random backgrounds were assigned. The images created in this way were subjected to numerous augmentation procedures, among others: \textit{horizontal} \textit{flip}, \textit{vertical flip}, \textit{blur}, \textit{rotation}, \textit{rgb values change}, \textit{grayscale}, \textit{fog}. To check how the model works on real data, images from the test set were not subjected to artificial augmentation.
+
+An important element of the division into training and test set, which should be emphasized, was the arrangement of objects depending on their angle. Table~\ref{tab:rotation_splits} shows how particular train test rotation splits were chosen.
+We knew that by dividing the dataset in the above way, we would disrupt train-test ditribution, assuming theoretically recommended random division of the base dataset into train and test sets. We decided to do this to check how roboust the models evaluated by us are. The introduction of such a disturbance in the distribution between the train and test sets also allowed us to check how models trained on a small amount of data generalize to the change in perspective under which the analyzed object is shown.
+
+We evaluated both neural networks described in \ref{sec:evaluated_models} on such prepared data sets. Both models have previously been adapted to the VISAPP \cite{visapp} dataset. ICnet and Unet were trained and validated on the same data sets within the same fold. The training process consisted of 32 epochs on the learning set. K-Fold validation was used for results corectness check.
+
+\begin{center}
+\begin{table}[H]
+\centering
+\tiny \renewcommand{\arraystretch}{1.5}
+\begin{tabular}
+{ |c||c|c||c|c||c|c| } \hline Class name & $Train^{rot1}$ & $Test^{rot1}$ & $Train^{rot2}$ & $Test^{rot2}$ & $Train^{rot3}$ & $Test^{rot3}$\\ [1.05ex] \hline
+$adapter$ &  0, 30, 90 & 60 & 0, 60, 90 & 30 & 30, 60, 90 & 0 \\ \hline
+$bottle$ &  0, 60 & 30 & 0, 30 & 60 & 30, 60 & 0 \\ \hline
+$box$ &  0, 60 & 30 & 0, 30 & 60 & 30, 60 & 0 \\ \hline
+$clamb$ &  0, 60 & 30 & 0, 30 & 60 & 30, 60 & 0 \\ \hline
+$drill$ &  0, 30, 90 & 60 & 0, 60, 90 & 30 & 30, 60, 90 & 0 \\ \hline
+$duck$ &  0, 60 & 30 & 0, 30 & 60 & 30, 60 & 0 \\ \hline
+\end{tabular}
+\caption{VISAPP~\cite{visapp} rotation train-test splits}
+\label{tab:rotation_splits}
+\end{table}
+\end{center}
 
 \subsection{Evaluation strategy}
 \label{sec:eval_strategy}
