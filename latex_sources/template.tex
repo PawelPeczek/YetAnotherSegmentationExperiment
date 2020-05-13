@@ -73,6 +73,13 @@ One of the first successful approaches towards semantic segmentation was propose
 A natural weakness of previously discussed models is not taking advantage of global context information when solving semantic segmentation task. Zhao et al. proposed PSPNet \cite{psp} that employs pyramid pooling module in order to provide a way to make pixel predictions with regard to scene context. For datasets with a wide range of labels that make the segmentation task significantly complex, global contextual prior is extremally helpful for making accurate predictions. Examples of classes that may be misleading for neural network are described in details in \cite{psp}. Worth noting is the fact that in PSPNet \cite{psp} a CNN output forwarded as an input of pyramid pooling module. Its output after required upsampling is concatenated with original feature map. This kind of modules composition occurs once, after the final convolutional layer of backbone model. A natural extension of this approach should be a desire to inject similar context-aware blocks directly into the encoder network. Regardless of that, the PSPNet \cite{psp} achieved state-of-the art performance in 2017 on CityScapes \cite{cityscapes} (80.2\% mIoU) and PASCAL VOC 2012 \cite{pascal_voc} (85.4\% mIoU). Worth noting also its accuracy (44.94\% mIoU) on significantly hard ADE20K \cite{ade20k} dataset.
 \paragraph{}
 Another neural network model based shaped in a fully-convolutional fashion was proposed by Ronneberger et al. \cite{unet}. Its architecture is composed of two major parts, named by the authors contracting and expansive paths. The contracting path follows the typical CNN architecture and acts as image features encoder. The second path, on the contrary, serves as decoder and at each step, it consists of upsampling operation followed by convolution. Feature channels number is doubled at each step of contracting path and halved on expansive path. Probability distributions over each pixel of the one before last activation map is produced by convolution with kernel size $1 \times 1$. The whole architecture is U-shaped and additionally employing skip connections between corresponding layers at both paths. Due to the significant difference in the field of applications that U-Net \cite{unet} was designed to, in the original paper there are no evaluation results on datasets like CityScapes \cite{cityscapes} or ADE20K \cite{ade20k}. The value of evaluation metrics mainly discussed in this work is reported only for medical datasets PhC-U373 \cite{phcu373} (92.03\% mIoU) and DIC-HeLa \cite{dichela} (77.56\% mIoU).
+\begin{figure}[!htb]
+    \centering
+  \includegraphics[width=10cm, keepaspectratio]{images/u-net-architecture.png}
+  \caption{U-Net~\cite{unet} architecture}
+  \label{fig:u-net-architecture}
+\end{figure}
+
 \paragraph{}
 Slightly different approach was proposed by Guosheng et al. in \cite{refinenet}. Their main assumption was to provide the model multiple paths over which contextual information from different regions of network may be used by the following layers to achieve improvement in segmentation accuracy. In order to reach desired property, the authors proposed the RefineNet architecture. The backbone ResNet \cite{resnet} is divided into 4 blocks with regards to the feature map sizes and serves as an input for RefineNet blocks. Their internal architecture provides a way to fuse feature maps in different resolutions coming from either backbone ResNet or another RefineNet block. RefineNet block as such provides a lot of flexibility in terms of network composition. The architecture described in \cite{refinenet} is therefore only one example of NN possible to be formulated as a part of architectures family that employs RefineNet blocks. Worth noting is the fact that Guosheng et al. in \cite{refinenet} put a lot of effort on ensuring the best possible gradient flow during backpropagation through the RefineNet blocks. Results reported on datasets relevant to this work: Cityscapes \cite{cityscapes} -- 73.6\% mIoU, PASCAL VOC \cite{pascal_voc} -- 83.4\% mIoU, ADE20K \cite{ade20k} -- 40.7\% mIoU.
 \paragraph{}
@@ -83,30 +90,7 @@ Wang et al. in \cite{duc} proposed another approach towards architecture of sema
 \subsection{Real-Time methods}
 \label{sec:rt_methods}
 \paragraph{}
-Zhao et al. in \cite{icnet} proposed architecture called ICNet based on the PSPNet \cite{psp} that reaches 30fps on Titan X GPU in high resolution (images from CityScape \cite{cityscapes} sized $1024 \times 2048$). All of this was achieved preserving trade-off between prediction accuracy and inference speed. Considering available time budget the model architecture relies on a cascade of processing pipelines, each operating on input with different resolution and effective feature fusion in \textit{Cascade Fusion Units (CFU)} both with \textit{Cascade Label Guidance (CLG)}. CFU is a sophisticated method for fusion the feature map that comes from different pipelines in such a way that allows to improve coarse, low-resolution prediction and build better, upsampled one. Feature map coming from a lower-resolution stream is upsampled by bilinear interpolation. To improve the quality of upsampling, the dilated convolution is applied directly at the top of it. The result is fused with the second feature map projected by $1 \times 1$ convolution operation. Both feature maps are added up after batch normalization layer being put on top each of them. CLG, on the other hand, is a form of loss function formulation in such manner that encourages intermediate low-resolution feature map to be as close as correspondingly resized ground-truth as possible. Results reported in \cite{icnet} are following: CityScapes \cite{cityscapes} -- 70.6\% mIoU, CamVid \cite{camvid} -- 67.1\% mIoU. 
-
-\paragraph{}
-U-shape network architecture used as design pattern when creating various semantic segmentation models (like \cite{icnet}) has few drawbacks. The most important ones are following: a) requirements to operate on high-resolution input feature maps at the initial stages of feed-forward pass and b) weak capacity to recover information from high-resolution branches due to use of low number of convolutional kernels (tight layers). Yu et al. in \cite{bisnet} proposed a different approach based on two major part: Spatial Path (SP) and Context Path (CP). SP handles spatial information preservation whereas CP (Xception-based \cite{xception} architecture) serve as context features extractor. Yu et al. proposed also a new fusion method to improve model performance. In order to ensure large effective receptive field, CP is based on standard, lightweight model (commonly used to solve classification task) followed by Global Average Pooling layer (GAP). What is more, due to refining features of particular CP stages, the authors proposed to use attention-based modules for guiding valuable features learning. Attention-based approach is also used in Feature Fusion Module which merges the results from SP and CP. Thanks to its design, BiSeNet achieves 74.8\% mIoU on CityScapes \cite{cityscapes} (validation set) and 68.7\% mIoU on CamVid \cite{camvid}. Results reported above in terms of CityScapes \cite{cityscapes} evaluation are correct under assumption of full-size (1024x2048) input and real-time regime (NVIDIA Titan XP - 65.5 fps). Without inference time constraints results are better and reaches 80.3\% mIoU on CityScapes \cite{cityscapes} (validation set).
-
-\paragraph{}
-Transfer learning is a common practice in wide range of Machine Learning application. Oršić et al. in \cite{swift_net} proposed an architecture utilizing ImageNet pre-trained features to achieve better performance on target task. Pretrained model serves as features encoder, whereas upsampling decoder is jointly trained from scratch on semantic segmentation task. At the end of encoder (in order to increase receptive field under real-time inference regime), simplified version of Spatial Pyramid Pooling block (inspired by one proposed in \cite{psp}) is attached. Decoder is composed of blocks with two inputs - one for previous encoder block output and second for corresponding encoder output (transformed by 1x1 conv). Thanks to ImageNet pretraining, the model achieves 75.5\% mIoU on CityScapes \cite{cityscapes} (validation set) and 39.9 fps inference speed (GTX 1080Ti) on full-size (1024x2048) input. What is more interesting - the same architecture without pretraining achieves  70.4\% mIoU on CityScapes (validation set), which is less than \cite{icnet}. When training without real-time constraint, 76.5\% mIoU on the same dataset was achieved.
-
-\clearpage
-
-\section{Method}
-\label{sec:method}
-\subsection{Evaluated convolutional neural network models}
-\label{sec:evaluated_models}
-
-\begin{figure}[!htb]
-    \centering
-  \includegraphics[width=10cm, keepaspectratio]{images/u-net-architecture.png}
-  \caption{U-Net~\cite{unet} architecture}
-  \label{fig:u-net-architecture}
-\end{figure}
-
-Opis unet
-
+Zhao et al. in \cite{icnet} proposed architecture called ICNet based on the PSPNet \cite{psp} that reaches 30fps on Titan X GPU in high resolution (images from CityScape \cite{cityscapes} sized $1024 \times 2048$). All of this was achieved preserving trade-off between prediction accuracy and inference speed. Considering available time budget the model architecture relies on a cascade of processing pipelines, each operating on input with different resolution and effective feature fusion in \textit{Cascade Fusion Units (CFU)} both with \textit{Cascade Label Guidance (CLG)}. CFU is a sophisticated method for fusion the feature map that comes from different pipelines in such a way that allows to improve coarse, low-resolution prediction and build better, upsampled one. Feature map coming from a lower-resolution stream is upsampled by bilinear interpolation. To improve the quality of upsampling, the dilated convolution is applied directly at the top of it. The result is fused with the second feature map projected by $1 \times 1$ convolution operation. Both feature maps are added up after batch normalization layer being put on top each of them. CLG, on the other hand, is a form of loss function formulation in such manner that encourages intermediate low-resolution feature map to be as close as correspondingly resized ground-truth as possible. Results reported in \cite{icnet} are following: CityScapes \cite{cityscapes} -- 70.6\% mIoU, CamVid \cite{camvid} -- 67.1\% mIoU.
 \begin{figure}[!htb]
     \centering
   \includegraphics[width=10cm, keepaspectratio]{images/i-cnet-architecture.png}
@@ -114,20 +98,30 @@ Opis unet
   \label{fig:i-cnet-architecture}
 \end{figure}
 
-Opis icnet
+\paragraph{}
+U-shape network architecture used as design pattern when creating various semantic segmentation models (like \cite{icnet}) has few drawbacks. The most important ones are following: a) requirements to operate on high-resolution input feature maps at the initial stages of feed-forward pass and b) weak capacity to recover information from high-resolution branches due to use of low number of convolutional kernels (tight layers). Yu et al. in \cite{bisnet} proposed a different approach based on two major part: Spatial Path (SP) and Context Path (CP). SP handles spatial information preservation whereas CP (Xception-based \cite{xception} architecture) serve as context features extractor. Yu et al. proposed also a new fusion method to improve model performance. In order to ensure large effective receptive field, CP is based on standard, lightweight model (commonly used to solve classification task) followed by Global Average Pooling layer (GAP). What is more, due to refining features of particular CP stages, the authors proposed to use attention-based modules for guiding valuable features learning. Attention-based approach is also used in Feature Fusion Module which merges the results from SP and CP. Thanks to its design, BiSeNet achieves 74.8\% mIoU on CityScapes \cite{cityscapes} (validation set) and 68.7\% mIoU on CamVid \cite{camvid}. Results reported above in terms of CityScapes \cite{cityscapes} evaluation are correct under assumption of full-size (1024x2048) input and real-time regime (NVIDIA Titan XP - 65.5 fps). Without inference time constraints results are better and reaches 80.3\% mIoU on CityScapes \cite{cityscapes} (validation set).
+
+\paragraph{}
+Transfer learning is a common practice in wide range of Machine Learning application. Oršić et al. in \cite{swift_net} proposed an architecture utilizing ImageNet pre-trained features to achieve better performance on target task. Pretrained model serves as features encoder, whereas upsampling decoder is jointly trained from scratch on semantic segmentation task. At the end of encoder (in order to increase receptive field under real-time inference regime), simplified version of Spatial Pyramid Pooling block (inspired by one proposed in \cite{psp}) is attached. Decoder is composed of blocks with two inputs - one for previous encoder block output and second for corresponding encoder output (transformed by 1x1 conv). Thanks to ImageNet pretraining, the model achieves 75.5\% mIoU on CityScapes \cite{cityscapes} (validation set) and 39.9 fps inference speed (GTX 1080Ti) on full-size (1024x2048) input. What is more interesting - the same architecture without pretraining achieves  70.4\% mIoU on CityScapes (validation set), which is less than \cite{icnet}. When training without real-time constraint, 76.5\% mIoU on the same dataset was achieved.
+
+
+\section{Method}
+\label{sec:method}
+\subsection{Evaluated convolutional neural network models}
+\label{sec:evaluated_models}
+As part of the task, we evaluated two convolution network architectures: U-Net \cite{unet} and ICnet \cite{icnet}.
 
 It is important to emphasize the significant difference in the number of trainable parameters between ICnet and U-net. Our implementation of ICNet has about 960 000 parameters, which is very small for a convolutional neural network, while U-net has significantly more parameters, as much as about 24 000 000. Comparing the number of parameters, we can see that IOcnet is 25 times smaller than U-net, which suggests that the ICnet will have a much shorter time of inference.
 
-\clearpage
 
 \subsection{Dataset description}
 \label{sec:dataset_desc}
-The VISAPP~\cite{visapp} data set we use contains six classes of objects: \textit{adapter}, \textit{bottle}, \textit{box}, \textit{clamb}, \textit{drill} and \textit{duck}. Each class is divided into subclasses depending on the angle at which the object is presented. All classes are shown at \textit{0\degree}, \textit{30\degree} and \textit{60\degree}, while the adapter and drill additionally at \textit{90\degree}. All elements of the set are raw objects without a background, which were deprived during preprocessing. VISAPP~\cite{visapp} contains an additional folder with backgrounds allowing to generate synthetic images of the same objects on different backgrounds, so there is possibility to  generate far more trainning set elements. Initially, not all classes had annotations about angles, so they were divided into angle subclasses manually.
+The VISAPP~\cite{visapp} data set we use contains six classes presented in \ref{fig:dataset_classes} of objects: \textit{adapter}, \textit{bottle}, \textit{box}, \textit{clamb}, \textit{drill} and \textit{duck}. Each class is divided into subclasses depending on the angle at which the object is presented. Examplary object under different angles is presented in \ref{fig:dataset_examplary_rotations}. All classes are shown at \textit{0\degree}, \textit{30\degree} and \textit{60\degree}, while the adapter and drill additionally at \textit{90\degree}. All elements of the set are raw objects without a background. VISAPP~\cite{visapp} contains an additional folder with backgrounds allowing to generate synthetic images of the same objects on different backgrounds, so there is possibility to  generate far more trainning set elements. Initially, not all classes had annotations about angles, so they were divided into angle subclasses manually.
 
 \begin{center}
 \begin{table}[H]
 \centering
-\tiny \renewcommand{\arraystretch}{1.5}
+\tiny \renewcommand{\arraystretch}{2.0}
 \begin{tabular}
 { |c|c|c|c|c||c| } \hline Class name & $0\degree$ & $30\degree$ & $60\degree$ & $90\degree$ & $All$  \\ [1.05ex] \hline
 $adapter$ &  36 & 36 & 36 & 36 & 144 \\ \hline
@@ -142,7 +136,27 @@ $duck$ &  11 & 33 & 50 & 0 & 94 \\ \hline
 \end{table}
 \end{center}
 
-MIEJSCE NA PRZYKŁADOWE OBRAZKI ZE ZBIORU DANYCH (BEZ TŁA, SAMO TŁO, Z TŁEM, ROTACJA)
+
+\begin{figure}[!htb]
+    \centering
+  \includegraphics[width=10cm, keepaspectratio]{images/dataset_examples/classes_cropped.png}
+  \caption{Examplary dataset objects withouts backrounds}
+  \label{fig:dataset_classes}
+\end{figure}
+
+\begin{figure}
+    \centering
+  \includegraphics[width=10cm, keepaspectratio]{images/dataset_examples/backgrounds_cropped.png}
+  \caption{Examplary dataset  backrounds}
+  \label{fig:dataset_backgrounds}
+\end{figure}
+
+\begin{figure}
+    \centering
+  \includegraphics[width=10cm, keepaspectratio]{images/dataset_examples/rotations_cropped.png}
+  \caption{Examplary dataset object angles}
+  \label{fig:dataset_examplary_rotations}
+\end{figure}
 
 \subsection{Training strategy}
 \label{sec:train_strategy}
